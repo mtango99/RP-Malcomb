@@ -14,7 +14,7 @@ output: html_document
 
 ```{r libraries, include = F}
 
-packages = c("downloader","haven","stars","dplyr","sf","rdhs", "classInt", "readr", "ggplot2", "here", "s2")
+packages = c("downloader","haven","stars","dplyr","sf","rdhs", "classInt", "readr", "ggplot2", "here", "s2", "foreign")
 setdiff(packages, rownames(installed.packages()))
 install.packages(setdiff(packages, rownames(installed.packages())), quietly=TRUE)
 
@@ -29,6 +29,7 @@ library(rdhs)
 library(readr)
 library(ggplot2)
 library(s2)
+library(foreign)
 
 sf_use_s2(T)
 ```
@@ -85,15 +86,31 @@ set_rdhs_config(
 
 ```{r downloading dhs data}
 dhs_downloads = get_datasets(
-  c("MWHR61SV"), #, "MWGE62FL"),#, "MWHR4ESV", "MWGE4BFL"
+  c("MWHR61SV"), #, "MWGE62FL"
   all_lower = FALSE,
   download_option = "rds"
 )
 ```
-```{to load in previously downloaded DHS data}
+```{r downloading dhs data}
+
+#survey <- read.spss(here("data", "raw", "private", "MWHR61SV", "MWHR61FL.SAV"))
+#df <- data.frame(matrix(unlist(l), nrow=132, byrow=TRUE),stringsAsFactors=FALSE)
+
+survey <- data.frame(read.spss(here("data", "raw", "private", "MWHR61SV", "MWHR61FL.SAV")), stringsAsFactors=FALSE)
+
+survey2 <- data.frame(lapply(survey, function(x) as.numeric(as.character(x))))
+
+survey3 <- read.spss((here("data", "raw", "private", "MWHR61SV", "MWHR61FL.SAV")), to.data.frame = TRUE, stringsAsFactors=FALSE)
+#as factors, not numbers
 
 
-, "MWHR4ESV", "MWGE4BFL"
+survey4 <- read_sav((here("data", "raw", "private", "MWHR61SV", "MWHR61FL.SAV")))
+
+
+require(sf)
+shape = read_sf(here("data", "raw", "private","MWGE62FL", "MWGE62FL.shp")) %>%
+  st_make_valid()
+
 ```
 
 ```{r 2010 adaptive capacity data}
@@ -104,8 +121,7 @@ ta = read_sf(here("data", "raw", "public","traditional_authorities", "MWI_adm2.s
 lhz = read_sf(here("data", "raw", "public", "livelihood_zones", "MW_LHZ_2009.shp")) %>% st_make_valid()
 
 #### adding traditional authority and livelihood zone ids to dhs clusters ####
-dhsclusters_2010 = readRDS(dhs_downloads$MWGE62FL) %>%
-  as("sf") %>% 
+dhsclusters_2010 = shape %>% 
   st_transform(3395) %>% 
   # only joining id for traditional authorities and livelihood zones to dhs clusters
   st_join(st_transform(select(ta, ID_2),3395)) %>%
@@ -114,7 +130,7 @@ dhsclusters_2010 = readRDS(dhs_downloads$MWGE62FL) %>%
          lhz_id = FNID,
          urban_rural = URBAN_RURA)
 
-dhshh_2010 = readRDS(dhs_downloads$MWHR61SV) %>% zap_labels() 
+dhshh_2010 = survey4 %>% zap_labels() 
 ```
 
 ```{r households to remove (2010)}
@@ -141,7 +157,8 @@ rmv_2010 = dhshh_2010 %>%  filter( #filter keeps these, but it is inside a remov
 ) %>% pull(HHID) #uses household id to filter out ones with missing data
 ```
 
-```{r capacity in traditional authorities 2010}
+```{r capacity in traditional authorities 2010} 
+#CREATES EMPTY TABLE!!!!
 #### matches household data to dhs clusters --> aggregate ####
 ta_capacity_2010 = dhshh_2010 %>%
   # joining traditional authority ids and urban_rural column 
@@ -176,7 +193,7 @@ ta_capacity_2010 = dhshh_2010 %>%
   # 24028 obs. of 19 variables 
   # using rowwise() to find sum of all types of livestock by household 
   rowwise %>%
-  mutate(hhlivestock = sum(HV246A, HV246D, HV246E, HV246G, na.rm = T)) %>%
+  mutate(hhlivestock = sum(HV246A, HV246D, HV246E, HV246G, na.rm = T)) %>% 
   ungroup %>%
   # using percent_rank(), those  
   # in cases where desc() is used, having a greater value before ranked makes a household more vulnerable 
@@ -237,14 +254,14 @@ ta = left_join(
   ta,
   select(ta_capacity_2010, ta_id, capacity_2010 = capacity_avg),
   by = c("ID_2" = "ta_id")
-)
+) #doesn't work... 
 
 # making capacity score resemble malcomb et al's work (scores on range of 0-20)
 ta = mutate(ta, capacity_2010 = capacity_2010 * 20)
 # 256 features 
 
 # preparing breaks for mapping using natural jenks method
-ta_brks = filter(ta, !is.na(capacity_2010)) %>% {classIntervals(.$capacity_2010, 4, style = "jenks")$brks}
+ta_brks = filter(ta, !is.na(capacity_2010)) %>% {classIntervals(.$capacity_2010, 4, style = "jenks")$brks} # did not work
 
 ta_int = lapply(1:4, function(x) paste0(round(ta_brks[x],2)," - ", round(ta_brks[x +1],2))) %>% unlist()
 
