@@ -63,38 +63,10 @@ if (!"major_lakes.csv" %in% list.files(public_r)) {
 }
 ```
 
-```{r dhs data access configuration}
-#### enter credentials for USAID data ####
-email = readline(prompt="Enter DHS Login Email: ")
-project = readline(prompt="Enter Project Name: ") #Reproducing a Vulnerability Model of Malawi
-rdhs_json = here("data","raw","private","rdhs.json")
 
-#### create file for dhs data ####
-if (!file.exists(rdhs_json)) file.create(rdhs_json)
-
-# the information here was established through DHS project approval. See dhs-metadata.md in the data/metadata folder for details.
-# running this function will prompt you to enter email and project information in the Console and password in a popup
-set_rdhs_config(
-  email = email,
-  project = project,
-  config_path = rdhs_json,
-  global = FALSE,
-  cache_path = here("data","raw","private")
-)
-
-```
-
-```{r downloading dhs data}
-dhs_downloads = get_datasets(
-  c("MWHR61SV"), #, "MWGE62FL"
-  all_lower = FALSE,
-  download_option = "rds"
-)
-```
 ```{r downloading dhs data}
 
 survey <- read_sav((here("data", "raw", "private", "MWHR61SV", "MWHR61FL.SAV")))
-
 
 require(sf)
 shape = read_sf(here("data", "raw", "private","MWGE62FL", "MWGE62FL.shp")) %>%
@@ -237,13 +209,41 @@ ta_capacity_2010 = dhshh_2010 %>%
   ) 
 ```
 
+``` {r calculating 2010 livelihood sensitivity}
+
+lhzSensitivity = lhz %>% 
+  filter(!is.na(jpctFoodCr)) %>% 
+  mutate(
+    foodCrops = percent_rank(jpctFoodCr) * 4 + 1, # * 4 + 1 re-scales to match malcomb et al.
+    wageIncome = percent_rank(jpctIncome) * 4 + 1,
+    disasterCoping = percent_rank(desc(jPctDCS)) * 4 + 1, #bc higher income from ecologically destructive practices makes you more vulnerable
+    cashCropInc = percent_rank(desc(jPctIncCas) * 4 + 1 #bc selling cash crops makes you vulnerable to the global economy
+  ) %>% 
+    rowwise %>% 
+    mutate(
+      sensitivity = sum(
+        foodCrops * 0.06,
+        wageIncome * 0.06,
+        disasterCoping * 0.04,
+        cashCropInc * 0.04
+      )
+    )
+    
+  ```{r saving livelihood sensitivity socres}
+  
+  write_sf(
+    lhzSensitivity, here("data", "derived", "private", "lhzSensitivity.shp")
+  )
+
+```
+
 ```{r joining 2010 capacity to ta and creating breaks for visualization}
 # join mean capacity to traditional authorities polygon layer 
 ta = left_join(
   ta,
   select(ta_capacity_2010, ta_id, capacity_2010 = capacity_avg),
   by = c("ID_2" = "ta_id")
-) #doesn't work... 
+)
 
 # making capacity score resemble malcomb et al's work (scores on range of 0-20)
 ta = mutate(ta, capacity_2010 = capacity_2010 * 20)

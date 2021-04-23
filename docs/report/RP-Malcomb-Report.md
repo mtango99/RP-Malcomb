@@ -10,11 +10,11 @@ title: RP- Vulnerability modeling for sub-Saharan Africa
 Original study *by* Malcomb, D. W., E. A. Weaver, and A. R. Krakowka. 2014. Vulnerability modeling for sub-Saharan Africa: An operationalized approach in Malawi. *Applied Geography* 48:17–30. DOI:[10.1016/j.apgeog.2014.01.004](https://doi.org/10.1016/j.apgeog.2014.01.004)
 
 Replication Authors:
-Your Name, Joseph Holler, Kufre Udoh, Open Source GIScience students of fall 2019 and Spring 2021
+Madeleine Tango, Joseph Holler, Kufre Udoh, Open Source GIScience students of fall 2019 and Spring 2021
 
 Replication Materials Available at: [github repository name](github repository link)
 
-Created: `DD Month YYYY`
+Created: `23 April 2021`
 Revised: `DD Month YYYY`
 
 ## Abstract 
@@ -59,6 +59,8 @@ Figures to Include:
 - map of vulnerability in Malawi, analagous to figure 5 of the original study
 - map of difference between your figure 4 and the original figure 4
 - map of difference between your figure 5 and the original figure 5
+--Ordinal data: Ratio/Interval data: continuous. RMSE (Root mean square error)
+---Spearman's Rho (try to get close to 1-- positive correlation. -1,0,1 and statistically significant)
 
 ## Unplanned Deviations from the Protocol
 
@@ -71,8 +73,17 @@ Summarize changes and uncertainties between
 Provide a summary and interpretation of the key findings of the replication *vis-a-vis* the original study results. If the attempt was a failure, discuss possible causes of the failure. In this replication, any failure is probably due to practical causes, which may include:
 - lack of data
 - lack of code
-- lack of details in the original analysis
-- uncertainties due to manner in which data has been used
+- lack of details in the original analysis (join back?)
+- uncertainties due to manner in which data has been used (uncertainties and vulnerability paper; also Longley's paper)
+- Also the handout (what was the filter-- how did they conceptualize things, how did they measure?-- what contributed to uncertainty)
+- Using reproductions to help with uncertainty (in data and analysis/how it was written)
+- data uncertainty-- compiled spreadsheet
+- subjectiveness of markers
+- database ethnographies paper (semantic shifts in data representation)
+- Monte Carlo simulation (Tate analysis of uncertainty/sensitivity)-- could do multiple times (subjective decision)-- and write code as fxn and compare which is closest (R works, Q would be hard)
+- which income counts as wage income?
+- Internal validation
+- External validation (generalizable theory, ground truthing)-- did climate change, and were people harmed as predicted?
 
 ## Conclusion
 
