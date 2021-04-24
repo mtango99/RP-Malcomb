@@ -15,7 +15,7 @@ Madeleine Tango, Joseph Holler, Kufre Udoh, Open Source GIScience students of fa
 Replication Materials Available at: [github repository name](github repository link)
 
 Created: `23 April 2021`
-Revised: `DD Month YYYY`
+Revised: `24 April 2021`
 
 ## Abstract 
 
@@ -29,6 +29,39 @@ The original study was published without data or code, but has detailed narrativ
 
 
 ### Data Description and Variables
+
+This study used a variety of variables to determine vulnerability. Demographic and Helath Survey (DHS) 
+data (with GPS) was used to create an **adaptive capacity** layer, which included 
+assets (livestock units, arable land, number of those sick in household in past 
+12 months, wealth index score, and number of orphans in household) and access (time 
+to water source, has electricity, type of cooking fuel, sex of head of household, 
+owns a cell phone, owns a radio, and urban/rural). **Livelihood sensitivity** data came from 
+interviews with the Malawi Vulnerability Assessment Committee, as well as data they created 
+with the Famine Early Warning System Netowrk and the US Agency for International Development. 
+Livelihood sensitivity variables include food from own farm (less vulnerability), 
+income from wage labor (less vulnerability), income from cash crops (more vulnerability), 
+and disaster coping strategies (looking specifically at environmentally harmful practices, 
+which cause vulnerability). 
+A **physical exposure** layer included data from UNEP Global Resource Information
+Database (GRID)-Europe with variables of estimated risk for flood hazard and exposition to drought events. 
+
+All vulnerability variables were normalized on a scale from of 1-5. 
+Depending on how much Malcomb et al. (2014) thought each variable would contribute 
+to vulnerability, based on their interviews with "experts," each variable was given 
+particular weights (Table 1) and combined to create a vulnerability index. 
+After the original normalization from 1-5, 
+adaptive capacity scores were weighted and then normalized on a range of 0-20 in our 
+reproduction, making the numbers similar to those in the resilience figures in Malcomb et al. (2014), 
+but it was unclear how exactly they were normalized in the original paper. 
+
+Traditional authority boundary vector layers were downloaded from 
+Livelihood zones were created based on **INSERT HERE**.
+
+**AGGREGATING TO DIFF GEO UNITS:**
+
+![Table 1.](assets/resilienceWeights.png)
+Table 1. Resilience weights. From Malcomb et al. (2014), Table 2. 
+
 
 Outline the data used in the study, including:
 
@@ -45,7 +78,33 @@ The replication study will use R.
 
 ## Materials and Procedure
 
-**COPY YOUR WORKFLOW CONTENT HERE**
+1. Data Preprocessing:
+	1. Download traditional authorities: MWI_adm2.shp
+1. Adding TA and LZ ids to DHS clusters 
+1. Removing HH entries with invalid or unknown values 
+1. Aggregating HH data to DHA clusters, and then joining to traditional authorities to get: ta_capacity_2010
+1. Removing index and livestock values that were NA 
+1. Sum of Livestock by HH
+1. Scale adaptive capacity fields (from DHS data) on scale of 1 - 5 to match Malcomb et al.
+1. Weight capacity based on table 2 in Malcomb et al. 
+	1. Calculate capacity by summing all weighted capacity fields
+1. Summarize capacity from households to traditional authorities
+1. Joining mean capacities to TA polygon layer
+1. Making capacity score resemble Malcomb et al's work (scores on range of 0-20) by multiplying capacity score by 20
+1. Categorizing capacities using natural jenks methods 
+1. Creating blank raster and setting extent of Malawi - CRS: 4326 
+1. Reproject, clip and resampling flood risk and drought exposure rasters to new extent and cell size
+	1. Uses bilinear resampling for drought to average continuous population exposure values
+	1. Uses nearest neighbor resampling for flood risk to preserve integer values
+	1. Removing factors and recasting them as integers
+	1. Clipping TAs with LZs to remove lake
+	1. Rasterizing final TA capacity layer 
+1. Masking flood and drought layers 
+1. Reclassify drought raster into quantiles
+1. Add all RASTERs together to calculate final output:  final = (40 - geo) * 0.40 + drought * 0.20 + flood * 0.20
+1. Using zonal statistics to aggregate raster to TA geometry for final calculation of vulnerability in each traditional authority 
+
+
 
 ## Replication Results
 
@@ -67,6 +126,10 @@ Figures to Include:
 Summarize changes and uncertainties between
 - your interpretation and plan for the workflow based on reading the paper
 - your final workflow after accessing the data and code and completing the code
+-0-5?1-5?
+-Getting rid of NAs
+
+It had looked like the authors 
 
 ## Discussion
 
@@ -84,6 +147,8 @@ Provide a summary and interpretation of the key findings of the replication *vis
 - which income counts as wage income?
 - Internal validation
 - External validation (generalizable theory, ground truthing)-- did climate change, and were people harmed as predicted?
+- Do figures show the data we think they do? not sure if adaptive capacity or overall vulnerability score
+
 
 ## Conclusion
 
