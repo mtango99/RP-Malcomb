@@ -119,7 +119,8 @@ Figures to Include:
 - map of difference between your figure 4 and the original figure 4
 - map of difference between your figure 5 and the original figure 5
 --Ordinal data: Ratio/Interval data: continuous. RMSE (Root mean square error)
----Spearman's Rho (try to get close to 1-- positive correlation. -1,0,1 and statistically significant)
+---Spearman's Rho (try to get close to 1-- positive correlation. -1,0,1 and statistically significant): TABLE
+- Graph of Figure 5 scatterplot
 
 ## Unplanned Deviations from the Protocol
 
