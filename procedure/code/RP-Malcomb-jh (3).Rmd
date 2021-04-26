@@ -586,7 +586,9 @@ fig5comp = fig5comp %>% mutate( diff = rp - or )
 # calculate difference between the original and reproduction,
 # for purposes of mapping
 
-write_stars(fig5comp, here("data","derived","public","fig5comp.tif"))
+write_stars(fig5comp["diff"], here("data","derived","public","fig5comp.tif"))
+#join to raster?? tcapacity
+
 
 
 fig5comppts = st_as_sf(fig5comp)
@@ -598,8 +600,62 @@ plot(fig5comppts$or, fig5comppts$rp, xlab="Original Study", ylab="Reproduction")
 cor.test(fig5comppts$or, fig5comppts$rp, method="spearman")
 # Spearman's Rho correlation test
 ```
+```{r fig4compare map}
+map_fig4compare = ggplot() +
+  geom_sf(data = ea,
+          aes(fill = EA),
+          color = NA) +
+  geom_sf(
+    data = fig4compare,
+    aes(fill = factor(difference)),
+    color = "white",
+    lwd = .2
+  ) + scale_fill_manual(
+    values = list(
+      "Missing Data" = "#FFC389",
+      "National Parks and Reserves" = "#D9EABB",
+      "Major Lakes of Malawi" = "lightblue",
+      "-2" = "#333333",
+      "-1" = "#666666",
+      "0" = "#999999",
+      "1" = "#000000",
+      "2" = "#CCCCCC"
+    )
+  ) +
+  scale_x_continuous(breaks = c(33,34,35,36)) +
+  labs(title = "Difference in Adaptive Capacity Scores Based on 2010 DHS Surveys in 197 Traditional Authorities") +
+  theme_minimal() +
+  theme(legend.title = element_blank())
 
+map_fig4compare
 
+```
 
+```{r diff vulnerability map fig5comp}
+map_fig5comp = ggplot() +
+  geom_sf(data = ea,
+          fill = clrs,
+          color = NA) +
+  geom_stars(data = fig5comp["diff"]) +
+  scale_fill_gradient(
+    low = "#FFFF75",
+    mid = "CCCCCC",
+    high = "#CF4611",
+    breaks = c(-0.8176,  0, 0.6141),
+    labels = c("Lower Vulnerability", "Mid", "Higher Vulnerability"),
+    na.value = "transparent",
+    guide = "colourbar",
+    limits = c(-0.8176, 0, 0.6141)
+  ) +
+  scale_x_continuous(breaks = c(33,34,35,36)) +
+  labs(title = "Difference in Malawi Vulnerability to Climate Change") +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  )
 
+map_fig5comp
+```
 
