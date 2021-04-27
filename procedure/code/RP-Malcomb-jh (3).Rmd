@@ -522,29 +522,7 @@ fig4compare = mutate(fig4compare, difference = rp_res - resilience2)
 results2 = here("data","derived","public","fig4compare2.gpkg")
 write_sf(fig4compare, results2, "fig4compare2")
 
-# TRY TO VISUALIZE fig4compare
-fig4compare_map = ggplot() +
-  geom_sf(data = fig4compare,
-          fill = clrs,
-          color = NA) +
-  geom_stars(data = ta_final) +
-  scale_fill_gradient(
-    low = "#FFFF75",
-    high = "#CF4611",
-    breaks = c(9.968335,  17.99652),
-    labels = c("Lower Vulnerability", "Higher Vulnerability"),
-    na.value = "transparent",
-    guide = "colourbar",
-    limits = c(9.968335,  17.99652)
-  ) +
-  scale_x_continuous(breaks = c(33,34,35,36)) +
-  labs(title = "Malawi Vulnerability to Climate Change") +
-  theme_minimal() +
-  theme(
-    legend.title = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  )
+
 ```
 
 
@@ -610,19 +588,10 @@ map_fig4compare = ggplot() +
     aes(fill = factor(difference)),
     color = "white",
     lwd = .2
-  ) + scale_fill_manual(
-    values = list(
-      "Missing Data" = "#FFC389",
-      "National Parks and Reserves" = "#D9EABB",
-      "Major Lakes of Malawi" = "lightblue",
-      "-2" = "#333333",
-      "-1" = "#666666",
-      "0" = "#999999",
-      "1" = "#000000",
-      "2" = "#CCCCCC"
-    )
-  ) +
-  scale_x_continuous(breaks = c(33,34,35,36)) +
+  )+
+    scale_fill_manual(limits = c("-2","-1","0","1","2","Missing Data","Major Lakes of Malawi","National Parks and Reserves"), 
+                    values = c("-2"="darkred","-1"="red","0"="grey","1"="green","2"="blue","Missing Data"="#000000","Major Lakes of Malawi"="lightblue","National Parks and Reserves"="#D9EABB"))+ #thanks Vincent
+  scale_x_continuous(breaks = c(33,34,35,36)) +  
   labs(title = "Difference in Adaptive Capacity Scores Based on 2010 DHS Surveys in 197 Traditional Authorities") +
   theme_minimal() +
   theme(legend.title = element_blank())
@@ -632,6 +601,7 @@ map_fig4compare
 ```
 
 ```{r diff vulnerability map fig5comp}
+
 map_fig5comp = ggplot() +
   geom_sf(data = ea,
           fill = clrs,
@@ -639,13 +609,12 @@ map_fig5comp = ggplot() +
   geom_stars(data = fig5comp["diff"]) +
   scale_fill_gradient(
     low = "#FFFF75",
-    mid = "CCCCCC",
     high = "#CF4611",
-    breaks = c(-0.8176,  0, 0.6141),
-    labels = c("Lower Vulnerability", "Mid", "Higher Vulnerability"),
+    breaks = c(-0.8176,0.6141),
+    labels = c("RP Vunerability Lower", "RP Vulnerability Higher"),
     na.value = "transparent",
     guide = "colourbar",
-    limits = c(-0.8176, 0, 0.6141)
+    limits = c(-0.8176,0.6141)
   ) +
   scale_x_continuous(breaks = c(33,34,35,36)) +
   labs(title = "Difference in Malawi Vulnerability to Climate Change") +
@@ -656,6 +625,26 @@ map_fig5comp = ggplot() +
     axis.title.y = element_blank()
   )
 
+
 map_fig5comp
 ```
 
+```{r saving difference maps}
+
+save(map_fig4compare, map_fig5comp, file = here("results","maps","diffmaps.Rdata"))
+
+ggsave(
+  here("results","maps","map_fig4compare.png"),
+  plot = map_fig4compare,
+  width = 8.5,
+  height = 11,
+  units = "in"
+)
+ggsave(
+  here("results","maps","map_fig5comp.png"),
+  plot = map_fig5comp,
+  width = 8.5,
+  height = 11,
+  units = "in"
+)
+```
