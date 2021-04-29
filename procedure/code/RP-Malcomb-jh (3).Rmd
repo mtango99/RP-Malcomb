@@ -30,6 +30,8 @@ library(readr)
 library(ggplot2)
 library(s2)
 
+citation("readr")
+
 sf_use_s2(T)
 ```
 
