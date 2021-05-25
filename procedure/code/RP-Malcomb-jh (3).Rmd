@@ -594,8 +594,8 @@ map_fig4compare = ggplot() +
     scale_fill_manual(limits = c("-2","-1","0","1","2","Missing Data","Major Lakes of Malawi","National Parks and Reserves"), 
                     values = c("-2"="#d7191c","-1"="#fdae61","0"="#ffffbf","1"="#abdda4","2"="#2b83ba","Missing Data"="grey","Major Lakes of Malawi"="lightblue","National Parks and Reserves"="#D9EABB"))+ #thanks Vincent for the code (makes the scale in order)
   scale_x_continuous(breaks = c(33,34,35,36)) +  
-  labs(title = "Difference in Adaptive Capacity Scores") +
-    #Based on 2010 DHS Surveys in 197 Traditional Authorities
+  labs(title = "Difference in Adaptive Capacity Scores Based on 2010 DHS Surveys") +
+    # in 197 Traditional Authorities
   theme_minimal() +
   theme(legend.title = element_blank())
 
@@ -610,14 +610,16 @@ map_fig5comp = ggplot() +
           fill = clrs,
           color = NA) +
   geom_stars(data = fig5comp["diff"]) +
-  scale_fill_gradient(
-    low = "#FFFF75",
-    high = "#CF4611",
-    breaks = c(-0.8176,0.6141),
+  scale_fill_gradient2( #thanks for this code, Vincent
+    midpoint = 0, #realized this wasn't working because needed to add a 2 to scale_fill_gradient so diff name (?)
+    low = "blue",
+    mid = "white",
+    high = "red",
+    breaks = c(-1,1),
     labels = c("RP Vunerability Lower", "RP Vulnerability Higher"),
     na.value = "transparent",
     guide = "colourbar",
-    limits = c(-0.8176,0.6141)
+    limits = c(-1, 1)
   ) +
   scale_x_continuous(breaks = c(33,34,35,36)) +
   labs(title = "Difference in Malawi Vulnerability to Climate Change") +
